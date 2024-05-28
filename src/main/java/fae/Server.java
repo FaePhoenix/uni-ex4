@@ -9,7 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Properties;
-
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -67,10 +66,19 @@ public class Server {
         String emailContent = "password: " + password;
         sendEmail(username, "Server-Verification", emailContent);
 
-        User client = new User(username);
-        client.setPassword(password);
-        this.users.add(client);
-        return true;
+        String paswordFromUser = in.readUTF();
+        if (paswordFromUser != password){
+            out.writeBoolean(false);
+            return false;
+        } else {
+            out.writeBoolean(true);
+            User client = new User(username);
+            client.setPassword(password);
+            this.users.add(client);
+            return true;
+        }
+
+        
     }
 
 
@@ -78,14 +86,17 @@ public class Server {
         String password = "";
         for (char c : username.toCharArray()) {
             int charNum = (int) c;
-            char nChar = (char)(charNum * Math.pow(3, charNum) % 128);
+            int compNum = (int) (charNum * Math.pow(1.1, charNum) % 128);
+            char nChar = (char) compNum;
+            
             password += nChar;
         }
+        System.out.println("Generated password: " + password);
         return password;
     }
     
 
-    public void sendEmail(String recipient, String mailSubject, String content) throws MessagingException {
+    private void sendEmail(String recipient, String mailSubject, String content) throws MessagingException {
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", true);
         prop.put("mail.smtp.starttls.enable", "true");

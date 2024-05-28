@@ -1,7 +1,6 @@
 package fae;
 
 import java.io.IOException;
-import jakarta.mail.MessagingException;
 
 
 
@@ -9,29 +8,26 @@ public class App
 {
     public static void main( String[] args )
     {
-        testing(); 
+        testing();
+        //ex4(); 
     }
 
 
     public static void testing(){
         try {
-            Server server = new Server();
+            Client me = new Client("f56755829@gmail.com");
+            System.out.println("connecting");
+            me.connect(1024);
+            System.out.println("done");
 
-            server.sendEmail("f56755829@gmail.com", "testing mail sending", "hopefully it works");
-        } catch (IOException | MessagingException e) {
+        } catch (IllegalEmailFormatException | IOException e) {
             e.printStackTrace();
+            System.out.println("error");
         }
-        
     }
 
 
     public static void ex4(){
-        try {
-            Client me = new Client("fae.koerper@hamburg.de");
-            me.connect(1024);
-
-        } catch (IllegalEmailFormatException | IOException e) {
-            e.printStackTrace();
-        }
+        
     }
 }
