@@ -1,0 +1,72 @@
+Server:
+
+    public void getEntryFile() throws IOException{
+        //open DataInputStream
+        DataInputStream dIN = new DataInputStream(in);
+
+        //recieve header information
+        String format = dIN.readUTF();
+        int numOfLines = dIN.readInt();
+
+        //recieve content
+        String[] recievedContent = new String[numOfLines];
+        for (int idx = 0; idx < numOfLines; idx++){
+            recievedContent[idx] = dIN.readUTF();
+        }
+        Boolean success = dIN.readUTF() == "done";
+        
+    }
+
+
+Client:
+
+        public void sendEntryFile(String entryFormat, String fileName) throws IOException{
+        FileHelper helper = new FileHelper(fileName);
+
+        ArrayList<String> toSend = helper.getContent();
+        int numOfLines = toSend.size();
+
+        DataOutputStream dOS = new DataOutputStream(out);
+
+        dOS.writeInt(numOfLines);
+        dOS.writeUTF(entryFormat);
+        for (String line : toSend) {
+            dOS.writeUTF(line);
+        }
+        dOS.writeUTF("done");
+    }
+
+    public FSUGenBank getEntryFile() throws IOException{
+
+        
+
+
+        return new FSUGenBank();
+    }
+
+
+    this.socket = new Socket("localhost", port);
+    this.in = socket.getInputStream();
+    this.out = socket.getOutputStream();
+
+
+
+old main:
+
+    //create needed Objects
+        Server server = new Server(1024);
+        Client client = new Client(1024, "ce73yut@uni-jena.de");
+        //send and recieve example-file
+        client.sendEntryFile("FSUGenbank", "txtfiles/FSUGenbankExample.txt");
+        server.getEntryFile();
+        //retrieve example-file back from server
+        server.sendEntryFile();
+        FSUGenBank askedEntrx = client.getEntryFile();
+        //send other formats to server
+        client.sendEntryFile("EMBL", "txtfiles/emblExample.txt");
+        client.sendEntryFile("GenBank", "txtfiles/genbankExample.txt");
+        server.getEntryFile();
+        server.getEntryFile();
+        //close connections
+        client.endConnection();
+        server.endConnection();

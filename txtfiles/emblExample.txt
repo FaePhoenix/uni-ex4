@@ -1,0 +1,102 @@
+XX
+AC   U22421;
+XX
+SV   U22421.1
+XX
+DT   13-APR-1995 (Rel. 43, Created)
+DT   17-APR-2005 (Rel. 83, Last updated, Version 3)
+XX
+DE   Mus musculus obesity protein (ob) gene, complete cds.
+XX
+KW   .
+XX
+OS   Mus musculus (house mouse)
+OC   Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi; Mammalia;
+OC   Eutheria; Euarchontoglires; Glires; Rodentia; Sciurognathi; Muridae;
+OC   Murinae; Mus.
+XX
+RN   [1]
+RP   1-2235
+RA   Chehab F.F., Lim M.E.;
+RT   "Genomic organization and sequence of the mouse obesity gene";
+RL   Unpublished.
+XX
+RN   [2]
+RP   1-2235
+RA   Chehab F.F., Lim M.E.;
+RT   ;
+RL   Submitted (09-MAR-1995) to the EMBL/GenBank/DDBJ databases.
+RL   Farid F. Chehab, Laboratory Medicine, University of California, San
+RL   Francisco, 505 Parnassus Avenue, San Francisco, CA 94143-0134, USA
+XX
+DR   MGI; 104663; Lep.
+XX
+FH   Key             Location/Qualifiers
+FH
+FT   source          1..2235
+FT                   /chromosome="6"
+FT                   /db_xref="taxon:10090"
+FT                   /mol_type="genomic DNA"
+FT                   /organism="Mus musculus"
+FT                   /strain="C57BL/6J"
+FT   CDS             join(1..144,1876..2235)
+FT                   /codon_start=1
+FT                   /db_xref="GOA:P41160"
+FT                   /db_xref="HSSP:1AX8"
+FT                   /db_xref="InterPro:IPR000065"
+FT                   /db_xref="InterPro:IPR009079"
+FT                   /db_xref="UniProt/Swiss-Prot:P41160"
+FT                   /gene="ob"
+FT                   /product="obesity protein"
+FT                   /protein_id="AAA64213.1"
+FT                   /translation="MCWRPLCRFLWLWSYLSYVQAVPIQKVQDDTKTLIKTIVTRINDI
+FT                   SHTQSVSAKQRVTGLDFIPGLHPILSLSKMDQTLAVYQQVLTSLPSQNVLQIANDLENL
+FT                   RDLLHLLAFSKSCSLPQTSGLQKPESLDGVLEASLYSTEVVALSRLQGSLQDILQQLDV
+FT                   SPEC"
+FT   intron          145..1875
+FT   repeat_region   449..585
+FT   misc_feature    1876..1879
+FT                   /note="slippage of acceptor site results in inclusion or
+FT                   exclusion of glutamine at amino acid position 49"
+FT                   /gene="ob"
+XX
+SQ   Sequence 2235 BP; 568 A; 571 C; 547 G; 549 T; 0 other;
+     atgtgctgga gacccctgtg tcggttcctg tggctttggt cctatctgtc ttatgttcaa        60
+     gcagtgccta tccagaaagt ccaggatgac accaaaaccc tcatcaagac cattgtcacc       120
+     aggatcaatg acatttcaca cacggtagga gtcttatggg gggacaaaga tgtaggacta       180
+     gaaccagagt ctgagaaaca tgtcatgcac ctcctagaag ctgagagttt ataagcctcg       240
+     agtgtacatt atctctggtc atggctcttg tcactgctgc ctgctgaaat acagggctga       300
+     gtggttccat ttctaaaccc agcatctaga ctgctcagct gtactgccag tatcgcatga       360
+     ttctaatcct aagccacctt agggaattta acttctctct tatactccca ttaagaaacc       420
+     ataaggtgtc gggcgtggtg gcacatgccc tctaatccca gaactcggga ggcagaggca       480
+     ggtggatttc tgagttcaag gccagcctgg tctacaaaat gagttccagg acagccaggg       540
+     ctatacagag aaaccctgtc tcgaaaaacc aaaaaagaag ccataaggtt ctttgatatc       600
+     ataaggccat gctcattttc cctctgccac aggaaaccca gcccttggtg gctagctgag       660
+     catgtaaggt acacatcaga cctgggagaa cctgggttcc tccctgcttc cacagaccac       720
+     cctctcccct tccttagccc cctgtttctg cctctctcat tctctttcat ccatgaaact       780
+     acttccttga atttagtacc cagggcataa gaatccctaa aggtcatggt gtcccattga       840
+     cacgtggaca gcttcccagc agtgtctcta ctgggcagga ggagcagtag gtttctaatg       900
+     gtttttagct acagcttctg cccaccgctc acccactttt caaagtcaca cagaaaacaa       960
+     cctttccctc ctttacaacc agtccttgtg tagctgctga tagtggtcgg tgcccaccat      1020
+     gttcttcctc cgaggcccag cagcctacat cttcagccat ttcctcagat gtatctaagc      1080
+     tatgtgcata tcaccatatc tgcttcccat ctgcaagatc ttaggccagt tctccggtgg      1140
+     gttttaaacc ttgattttac catcttgatg agggagacat catatcatat caccaagttg      1200
+     ttctaaggct taaatggggt gtagtgaaag actttcttgt ggagccatct ggagactact      1260
+     atgtctcctg accagtgtgc gtgtctcaca gtgtggcctt ggcagctagg agaagtcaga      1320
+     tattcagaat caagggacag cttaatataa gagacttatg cggagaaagt tctcatcatc      1380
+     tctcgacaag agtcatcagg gctgcacatg gagaggccca actacccaaa tgtgggtgga      1440
+     aatgagagga agccagtggg gaaagccctt cctggtaacc agactcagca gagtgggggg      1500
+     ggggggcacg gctttgaccc taatgaggga gaaccacaga agagtatgac taggagggag      1560
+     agatctgata agggcaggag gctagagaga atataaggaa taaagagcta tggctggttc      1620
+     ttcacggata tcattggaga aaggaattac tcaagactaa tcagaagtga agggtggagt      1680
+     gactcggaat gatcagaaag tccgggagac cagctccgtg gcttccagtc agctgatgac      1740
+     aggaagtaag gacctggacc aggaaggtga gaaggaagga ggtagcccag gttcacagat      1800
+     gtaatgtaga gctctggagc ccgatgctcc ctgccacttg ctaaaacacc tcttgttctt      1860
+     cttcctcctc catatcagtc ggtatccgcc aagcagaggg tcactggctt ggacttcatt      1920
+     cctgggcttc accccattct gagtttgtcc aagatggacc agactctggc agtctatcaa      1980
+     caggtcctca ccagcctgcc ttcccaaaat gtgctgcaga tagccaatga cctggagaat      2040
+     ctccgagacc tcctccatct gctggccttc tccaagagct gctccctgcc tcagaccagt      2100
+     ggcctgcaga agccagagag cctggatggc gtcctggaag cctcactcta ctccacagag      2160
+     gtggtggctt tgagcaggct gcagggctct ctgcaggaca ttcttcaaca gttggatgtt      2220
+     agccctgaat gctga                                                       2235
+//

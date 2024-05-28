@@ -2,10 +2,9 @@ package fae;
 
 import java.io.IOException;
 
-public class App 
-{
-    public static void main( String[] args )
-    {
+public class Main2 {
+    public static void main(String[] args) {
+            
         try {
             Client me = new Client("fae.koerper@hamburg.de");
             me.connect(1024);
@@ -13,6 +12,5 @@ public class App
         } catch (IllegalEmailFormatException | IOException e) {
             e.printStackTrace();
         }
-        
-    }
+        }
 }
