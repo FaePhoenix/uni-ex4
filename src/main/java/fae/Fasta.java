@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.json.JSONObject;
+
 
 public class Fasta {
     private String header;
@@ -182,6 +184,7 @@ public class Fasta {
         if (sequenceTry.matches("^[AGCT]*$")) {
             this.dnaSequence = sequenceTry;
         } else {
+            System.out.println(sequenceTry);
             throw new IllegalSequenceException("Given Sequence does not conform to Fasta-Sequence format.");
         }
     }
@@ -252,5 +255,15 @@ public class Fasta {
             }
         } 
         return repr; 
+    }
+
+    public JSONObject toJSON(){
+        JSONObject rep = new JSONObject();
+
+        rep.put("header", this.getHeader());
+        rep.put("comments",this.getComments());
+        rep.put("sequence",this.getDnaSequence());
+
+        return rep;
     }
 }
