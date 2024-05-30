@@ -76,9 +76,7 @@ public class Server {
             client.setPassword(password);
             this.users.add(client);
             return true;
-        }
-
-        
+        }      
     }
 
 

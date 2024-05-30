@@ -1,0 +1,15 @@
+{
+    "protocol_version" : "",
+    "protocol_type" : "",
+    "protocol_body" : {
+        "dataName" : "",
+        "dataBody" : {
+            "fasta" : "Obj",
+            "accession_numbers" : "",
+            "sequence_version" : "",
+            "organism_species" : "",
+            "keywords" : "",
+            "description" : ""
+        }
+    }
+}
