@@ -17,8 +17,14 @@ public class App
         try {
             Client me = new Client("f56755829@gmail.com");
             System.out.println("connecting");
-            me.connect(1024);
-            System.out.println("done");
+            if(me.connect(1024)){
+                System.out.println("done");
+                me.run();
+            } else {
+                System.out.println("Connection failed");
+            }
+            
+            
 
         } catch (IllegalEmailFormatException | IOException e) {
             e.printStackTrace();
