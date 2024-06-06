@@ -26,8 +26,14 @@ public class Fasta {
 
     public Fasta(JSONObject fasta) {
         this.header = fasta.getString("header");
+
         this.dnaSequence = fasta.getString("sequence");
+        
         JSONArray commentsExtract = fasta.getJSONArray("comments");
+        this.comments = new ArrayList<String>();
+        for (int idx = 0; idx < commentsExtract.length(); idx ++){
+            this.comments.add(commentsExtract.getString(idx));
+        }
 
         
 

@@ -210,9 +210,16 @@ public class Client{
                     JSONObject dataBody = responseBody.getJSONObject("data_body");
 
                     FSUGenBank entry = new FSUGenBank(dataBody);
-                    entry.saveToFile("txtfiles/" + entryName + ".txt");
+                    String saveLocation = "txtfiles/" + entryName + ".txt";
+                    entry.saveToFile(saveLocation);
+
+                    System.out.println("Successfully saved requested data as: " + saveLocation);
 
                     
+                } else {
+                    System.out.println("Got wrong protocol back. Please try again");
+                    System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type")); 
+                }
             } else {
                 System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
                 System.out.println("Got Objectt of instance: " + response.getClass());

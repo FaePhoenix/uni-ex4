@@ -33,6 +33,11 @@ public class FSUGenBank {
     public FSUGenBank(JSONObject dataBody){
         JSONObject fastaExtract = dataBody.getJSONObject("fasta");
         this.fasta = new Fasta(fastaExtract);
+        this.accessionNumbers = dataBody.getString("accession_numbers");
+        this.sequenceVersion = dataBody.getString("sequence_version");
+        this.organismSpecies = dataBody.getString("organism_species");
+        this.keywords = dataBody.getString("keywords");
+        this.description = dataBody.getString("description");
     }
 
     private void fromStr(ArrayList<String> lines){
