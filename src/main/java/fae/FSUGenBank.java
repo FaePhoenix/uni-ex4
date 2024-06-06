@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONObject;
+
 
 
 public class FSUGenBank {
@@ -28,6 +30,10 @@ public class FSUGenBank {
         this.fromStr(content);
     }
 
+    public FSUGenBank(JSONObject dataBody){
+        JSONObject fastaExtract = dataBody.getJSONObject("fasta");
+        this.fasta = new Fasta(fastaExtract);
+    }
 
     private void fromStr(ArrayList<String> lines){
         //extract indices

@@ -10,7 +10,7 @@ public class RequestBuilder {
     public RequestBuilder() {}
 
     public JSONObject buildDataSendProtocol(String filename) {
-        JSONObject baseProtocol = this.baseProtocol("0.0.1", "sendData");
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "send_data");
         FSUGenBank dataFile = new FSUGenBank(filename);
 
         JSONObject protocol = new JSONObject();
@@ -32,7 +32,7 @@ public class RequestBuilder {
 
 
     public JSONObject buildDataRequestProtocol(String dataName){
-        JSONObject baseProtocol = this.baseProtocol("0.0.1", "requestData");
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "request_data");
         JSONObject protocol = new JSONObject();
 
         protocol.put("data_name", dataName);
@@ -43,7 +43,7 @@ public class RequestBuilder {
 
 
     public JSONObject buildPasswordChangeProtocol(String newPassword){
-        JSONObject baseProtocol = this.baseProtocol("0.0.1", "changePassword");
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "change_password");
         JSONObject protocol = new JSONObject();
 
         protocol.put("new_password", newPassword);
@@ -52,6 +52,12 @@ public class RequestBuilder {
         return baseProtocol;
     }
 
+
+    public JSONObject buildEntriesRequestProtocol(){
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "request_entries");
+        
+        return baseProtocol;
+    }
 
 
     private JSONObject baseProtocol(String protocolVersion, String protocolType) {

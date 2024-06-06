@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -23,6 +24,14 @@ public class Fasta {
         dnaSequence = "";
     }
 
+    public Fasta(JSONObject fasta) {
+        this.header = fasta.getString("header");
+        this.dnaSequence = fasta.getString("sequence");
+        JSONArray commentsExtract = fasta.getJSONArray("comments");
+
+        
+
+    }
 
     public Fasta(String description, ArrayList<String> commentCollection, String sequence) throws IllegalHeaderException, IllegalCommentException, IllegalSequenceException{
         this.setHeader(description);

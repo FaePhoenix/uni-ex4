@@ -78,6 +78,16 @@ public class FileHelper {
         }
         return true;
     }
+
+    public Boolean isValidFile(String filename){
+        File fileToTest = new File(filename);
+        if(fileToTest.isFile()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
 }
 
 

@@ -1,9 +1,18 @@
+Client:
+    -requestData(BufferedReader userInput)
+    -requestAvailableEntries  --DONE (integrated)
+
+RequestBuilder:
+    -availableEntries --DONE
+
+Main + App:
+    -demonstration
+
+Server:
+    -alles
+       
+
 {
-  "protocol_type": "send_data",
-  "protocol_version": "0.0.1",
-  "protocol_body": {
-    "data_name": "txtfiles/FSUGenBankExample.txt",
-    "data_body": {
       "keywords": "keywordsTest",
       "accession_numbers": "accessionNumberTest",
       "description": "descriptionTest",
@@ -18,6 +27,4 @@
         "header": ">fasta Header"
       },
       "sequence_version": "sequenceVersionTest"
-    }
-  }
 }
