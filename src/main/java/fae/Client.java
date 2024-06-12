@@ -73,7 +73,7 @@ public class Client{
                     this.sendData(userInput);
 
                 case "R":
-                    this.requestData(userInput);
+                    this.handleRequestData(userInput);
 
                 case "E":
                     this.endConnection();
@@ -159,88 +159,122 @@ public class Client{
     }
 
 
-    private void requestData(BufferedReader userInput) throws IOException{
+    private void handleRequestData(BufferedReader userInput) throws IOException{
+
+        //Get available entries and end when not available
+        ArrayList<String> entries = requestEntries();
+        if (entries == null || entries.size() == 0) {
+            return;
+        }
+        
+        //Get user selection from entries
+        System.out.println("Please type one of the available entries you want to request:");
+        for (String entry : entries){
+            System.out.println(entry);
+        }
+        String requestedEntryName = userInput.readLine();
+
+        //Check if selected entry is valid
+        if (!entries.contains(requestedEntryName)){
+            System.out.println("Given name is not in the presented available entries. Please try again");
+            System.out.println("Got name: " + requestedEntryName);
+            return;
+        }
+           
+        //request valid data from server
+        this.requestData(requestedEntryName);
+    }
+
+
+    private ArrayList<String> requestEntries() throws IOException{
+
+        //Send request for available entries
         RequestBuilder protocolBuilder = new RequestBuilder();
         out.writeObject(protocolBuilder.buildEntriesRequestProtocol());
 
-        try {
-            Object response = in.readObject();
-            if (response instanceof JSONObject) {
-                JSONObject serverResponse = (JSONObject) response;
-                if (serverResponse.getString("protocol_type") == "entries_list") {
-                    JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
-                    int amount = responseBody.getInt("amount");
-
-                    if (amount == 0) {
-                        System.out.println("Server has no saved entries. Can't request Data");
-                    } else {
-                        
-                        ArrayList<String> entries = new ArrayList<String>();
-                        for (int idx = 1; idx <= amount; idx++){
-                            String entryName = "data_entry_" + idx;
-                            entries.add(responseBody.getString(entryName));
-                        }
-                        System.out.println("Please type one of the available entries you want to request:");
-                        for (String entry : entries){
-                            System.out.println(entry);
-                        }
-                        String requestedEntryName = userInput.readLine();
-                        if (entries.contains(requestedEntryName)){
-
-                            this.requestData(requestedEntryName);
-
-                        } else {
-                            System.out.println("Given name is not in the presented available entries. Please try again");
-                            System.out.println("Got name: " + requestedEntryName);
-                        }
-                    }
-                } else {
-                    System.out.println("Got wrong protocol back. Please try again");
-                    System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
-                }
-            } else {
-                System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-                System.out.println("Got Objectt of instance: " + response.getClass());
-            }
+        //Get server response
+        Object response;
+        try{
+            response = in.readObject();
         } catch(ClassNotFoundException exception){
             exception.printStackTrace();
+            return new ArrayList<String>();
+        }
+
+        //Check socket problems
+        if (!(response instanceof JSONObject)){
+            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
+            System.out.println("Got Objectt of instance: " + response.getClass());
+            return new ArrayList<String>();
+        }
+
+        //Check response type
+        JSONObject serverResponse = (JSONObject) response;
+        if(serverResponse.getString("protocol_type") != "entries_list"){ 
+            System.out.println("Got wrong protocol back. Please try again");
+            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
+            return new ArrayList<String>();
+        }
+
+        //Extract protocol-body
+        JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
+        int amount = responseBody.getInt("amount");
+
+        //Check for empty entries list
+        if (amount == 0) {
+            System.out.println("Server has no saved entries. Can't request Data");
+            return new ArrayList<String>();
         }
         
+        //Extract entries
+        ArrayList<String> entries = new ArrayList<String>();
+        for (int idx = 1; idx <= amount; idx++){
+            String entryName = "data_entry_" + idx;
+            entries.add(responseBody.getString(entryName));
+        }
+        
+        return entries;
     }
 
 
     private void requestData(String entryName) throws IOException {
+
+        //Send request to server
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject request = protocolBuilder.buildDataRequestProtocol(entryName);
-
         out.writeObject(request);
-
+        
+        //Get server response
+        Object response;
         try {
-            Object response = in.readObject();
-            if (response instanceof JSONObject) {
-                JSONObject serverResponse = (JSONObject) response;
-                if (serverResponse.getString("protocol_type") == "send_data") {
-                    JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
-                    JSONObject dataBody = responseBody.getJSONObject("data_body");
-
-                    FSUGenBank entry = new FSUGenBank(dataBody);
-                    String saveLocation = "txtfiles/" + entryName + ".txt";
-                    entry.saveToFile(saveLocation);
-
-                    System.out.println("Successfully saved requested data as: " + saveLocation);
-
-                    
-                } else {
-                    System.out.println("Got wrong protocol back. Please try again");
-                    System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type")); 
-                }
-            } else {
-                System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-                System.out.println("Got Objectt of instance: " + response.getClass());
-            }
+            response = in.readObject();
         } catch(ClassNotFoundException exception){
             exception.printStackTrace();
+            return;
         }
+        
+        //Check socket problems 
+        if (!(response instanceof JSONObject)) {
+            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
+            System.out.println("Got Objectt of instance: " + response.getClass());
+            return;
+        }
+        JSONObject serverResponse = (JSONObject) response;
+        
+        //Check response type
+        if (serverResponse.getString("protocol_type") != "send_data") {
+            System.out.println("Got wrong protocol back. Please try again");
+            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
+            return;  
+        }
+        
+        //Extract filename and save recieved information
+        JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
+        JSONObject dataBody = responseBody.getJSONObject("data_body");
+        FSUGenBank entry = new FSUGenBank(dataBody);
+        String saveLocation = "txtfiles/" + entryName + ".txt";
+        entry.saveToFile(saveLocation);
+        System.out.println("Successfully saved requested data as: " + saveLocation)
     }
 
 
