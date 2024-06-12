@@ -1,7 +1,5 @@
 package fae;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -9,12 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Random;
-
-import javax.swing.plaf.synth.SynthScrollPaneUI;
-
 import org.json.JSONObject;
-
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -67,11 +60,14 @@ public class Server {
         }
     }
 
-    //RE-DO
+
     private Boolean authenticate(Socket connection) throws IOException, MessagingException {
         ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
         ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream()); 
         
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        JSONObject userRepsonse = inStreamHelper.handleIN
         //Get user first-contact
         Object firstContact;
         try{
@@ -127,21 +123,24 @@ public class Server {
             return false;
         }
 
-        //Check user password
+        //Check user password 
+        RequestBuilder protocol_builder = new RequestBuilder();
         JSONObject protocolBody = userResponse.getJSONObject("protocol_body");
         String user_password = protocolBody.getString("user_password");
-        if(user_password != password) {
+        Boolean correctPwd = (user_password == password);
 
-
+        //Send status to user and check for incorrect pwd
+        JSONObject authenticationResponse = protocol_builder.buildUserConfirmationProtocol(correctPwd);
+        out.writeObject(authenticationResponse);
+        if (!correctPwd){
             return false;
-        } else {
-            User client = new User(username);
-            client.setPassword(password);
-            this.users.add(client);
-            return true;
         }
-
-
+        
+        //Add user to userlist
+        User client = new User(username);
+        client.setPassword(password);
+        this.users.add(client);
+        return true;
     }
 
 

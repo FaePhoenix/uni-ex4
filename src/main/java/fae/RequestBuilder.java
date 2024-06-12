@@ -86,6 +86,16 @@ public class RequestBuilder {
         return baseProtocol;
     }
 
+    public JSONObject buildUserConfirmationProtocol(Boolean status){
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "authenticate_response");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("handshake_status", status);
+        baseProtocol.put("protocol_body", protocol);
+        
+        return baseProtocol;
+    }
+
 
     private JSONObject baseProtocol(String protocolVersion, String protocolType) {
         JSONObject baseProtocol = new JSONObject();

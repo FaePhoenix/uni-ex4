@@ -87,7 +87,6 @@ public class Client{
         System.out.println("Client-Success for: " + this.user.getUsername());
         this.user.setPassword(password);
         return true;
-
     }
 
 
