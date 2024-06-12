@@ -1,6 +1,5 @@
 package fae;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,9 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import org.json.JSONObject;
-
 
 
 public class Client{
@@ -20,7 +17,6 @@ public class Client{
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-
 
 
     public Client() throws IOException{
