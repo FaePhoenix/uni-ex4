@@ -80,6 +80,13 @@ public class RequestBuilder {
     }
 
 
+    public JSONObject buildErrorProtocol() {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "error");
+
+        return baseProtocol;
+    }
+
+
     private JSONObject baseProtocol(String protocolVersion, String protocolType) {
         JSONObject baseProtocol = new JSONObject();
         baseProtocol.put("protocol_version", protocolVersion);

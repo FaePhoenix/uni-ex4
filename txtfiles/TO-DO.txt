@@ -1,13 +1,8 @@
-Client:
-    -requestData(BufferedReader userInput)
-    -requestAvailableEntries  --DONE (integrated)
+Server:
+    -authenticate
 
-RequestBuilder:
-    -availableEntries --DONE
+ServerThread:
+    -alles
 
 Main + App:
     -demonstration
-
-Server:
-    -alles
-       
