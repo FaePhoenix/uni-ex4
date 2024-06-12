@@ -127,7 +127,10 @@ public class Client{
 
 
     private void sendData(BufferedReader userInput) throws IOException{
-        
+
+        //Build helper
+        RequestBuilder protocolBuilder = new RequestBuilder();
+
         //Get filename from user
         System.out.println("Please enter the name of the file you want to send");
         String fileName = userInput.readLine();
@@ -139,7 +142,6 @@ public class Client{
         }
 
         //Send server the data
-        RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject request = protocolBuilder.buildDataSendProtocol(fileName);
         out.writeObject(request);
     }
@@ -227,6 +229,12 @@ public class Client{
 
 
     public void endConnection(){
+        //Notify server of connection end
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        JSONObject goodbyeMessage = protocolBuilder.buildEndConnectionProtocol();
+        out.writeObject(goodbyeMessage);
+
+        //Close socket connection
         if (this.socket != null){
             try{
                 socket.close();

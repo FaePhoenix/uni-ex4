@@ -97,10 +97,20 @@ public class RequestBuilder {
     }
 
 
+    public JSONObject buildEndConnectionProtocol() {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "end_connection");
+
+        return baseProtocol;
+    }
+
+
     private JSONObject baseProtocol(String protocolVersion, String protocolType) {
         JSONObject baseProtocol = new JSONObject();
         baseProtocol.put("protocol_version", protocolVersion);
         baseProtocol.put("protocol_type", protocolType);
         return baseProtocol;
     }
+
+
+    
 }
