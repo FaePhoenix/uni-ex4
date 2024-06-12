@@ -66,7 +66,7 @@ public class Client{
         BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
         while(true){
             System.out.println("Please Input your desired action:");
-            System.out.println("S (send data); R (request data); E (end connection); C (change password)");
+            System.out.println("S (send data); R (request data); C (change password); E (end connection)");
             String userAction = userInput.readLine();
             switch(userAction){
                 case "S":
@@ -84,8 +84,7 @@ public class Client{
                     this.changePassword(userInput);
 
                 default:
-                    System.out.println("Could not interpret Input. Please select an available action (S;R;E;C)");
-
+                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;E)");
             }
 
         }
@@ -93,39 +92,51 @@ public class Client{
 
 
     private void changePassword(BufferedReader userInput) throws IOException{
+
+        //Get new Password from user
         System.out.println("Please enter your new password");
         String newPassword = userInput.readLine();
         
+        //Send server the changing request
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject request = protocolBuilder.buildPasswordChangeProtocol(newPassword);
         out.writeObject(request);
 
+       //Get server response
+       Object response;
         try {
-            Object response = in.readObject();
-            if (response instanceof JSONObject){
-                JSONObject serverResponse = (JSONObject) response;
-                if(serverResponse.getString("protocol_type") == "change_password_response"){
-                    Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("change_status");
-                    if(success){
-                        System.out.println("Successfully changed password");
-                        this.user.setPassword(newPassword);
-                    } else {
-                        System.out.println("Password change was not successfull. Please try again");
-                        System.out.println("Changing password failed bc: " + serverResponse.getString("reason"));
-                    }
-
-                } else {
-                    System.out.println("Got wrong protocol back. Please try again");
-                    System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
-                }
-            } else {
-                System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-                System.out.println("Got Objectt of instance: " + response.getClass());
-            }
-        } catch (ClassNotFoundException | IOException e) {
-            
+            response = in.readObject();
+        } catch (ClassNotFoundException e) { 
             e.printStackTrace();
+            return;
         }
+
+        //Check socket problems
+        if (!(response instanceof JSONObject)){
+            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
+            System.out.println("Got Objectt of instance: " + response.getClass());
+            return;
+        }
+
+        //Check response type
+        JSONObject serverResponse = (JSONObject) response;
+        if(serverResponse.getString("protocol_type") != "change_password_response"){ 
+            System.out.println("Got wrong protocol back. Please try again");
+            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));  
+        }
+
+        //Check success of password change
+        Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("change_status");
+        if(!success){
+            System.out.println("Password change was not successfull. Please try again");
+            System.out.println("Changing password failed bc: " + serverResponse.getString("reason"));
+            return;
+        }
+
+        //Set new password
+        System.out.println("Successfully changed password");
+        this.user.setPassword(newPassword);
+        return;
     }
 
 
