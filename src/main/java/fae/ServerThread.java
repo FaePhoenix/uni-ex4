@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -73,7 +73,25 @@ public class ServerThread extends Thread{
 
 
     private void handleSentClientData(JSONObject protocolBody){
+        //save user entry
+        FSUGenBank sentEntry = new FSUGenBank(protocolBody.getJSONObject("data_body"));
+        String entryName = protocolBody.getString("data_name");
+        String saveLocation = this.settings.getEntryFolder() + entryName;
+        sentEntry.saveToFile(saveLocation);
 
+        //extract entrylist
+        String filename = this.settings.getEntryListLocation();
+        FileHelper entryList = new FileHelper(filename);
+        String content = String.join("", entryList.getContent());
+        JSONObject entries = new JSONObject(content);
+
+        //save expanded entrylist
+        JSONArray entrArray = entries.getJSONArray("entries");
+        entrArray.put(entryName);
+        JSONObject newEntrList = new JSONObject();
+        newEntrList.put("entries", entrArray);
+        FileHelper expEntryList = new FileHelper(newEntrList);
+        expEntryList.saveToFile(filename);
     }
 
     private void sendUserEntries(){

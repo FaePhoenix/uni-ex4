@@ -13,7 +13,7 @@ public class RequestBuilder {
         FSUGenBank dataFile = new FSUGenBank(filename);
 
         JSONObject protocol = new JSONObject();
-        protocol.put("data_name", filename);
+        protocol.put("data_name", filename.substring("txtfiles/".length(), filename.lastIndexOf(".txt")));
 
         JSONObject dataBody = new JSONObject();
         dataBody.put("fasta", dataFile.getFasta().toJSON());
