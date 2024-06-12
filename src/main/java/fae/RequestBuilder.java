@@ -104,12 +104,23 @@ public class RequestBuilder {
     }
 
 
+    public JSONObject buildAvailableEntriesProtocol(JSONObject entryList) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "entries_list");
+        baseProtocol.put("protocol_body", entryList);
+        
+        return baseProtocol;
+    }
+
+
     private JSONObject baseProtocol(String protocolVersion, String protocolType) {
         JSONObject baseProtocol = new JSONObject();
         baseProtocol.put("protocol_version", protocolVersion);
         baseProtocol.put("protocol_type", protocolType);
         return baseProtocol;
     }
+
+
+    
 
 
     

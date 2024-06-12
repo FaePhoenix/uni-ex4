@@ -13,15 +13,18 @@ public class ServerThread extends Thread{
     private Socket ClientConnection;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private ServerSetting settings;
 
     public ServerThread(){
         this.ClientConnection = new Socket();
+
     }
 
-    public ServerThread(Socket connection) throws IOException{
+    public ServerThread(Socket connection, ServerSetting settings) throws IOException{
         this.ClientConnection = connection;
         this.in = new ObjectInputStream(this.ClientConnection.getInputStream());
         this.out = new ObjectOutputStream(this.ClientConnection.getOutputStream()); 
+        this.settings = settings;
     }
 
     public void run() {
@@ -72,6 +75,41 @@ public class ServerThread extends Thread{
     }
 
     private void sendUserEntries(){
+
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //Get information from file
+        String fileName = this.settings.getEntryListLocation();
+        FileHelper helper = new FileHelper(fileName);
+        JSONObject entryList = new JSONObject(String.join("", helper.getContent()));
+
+        //Send available entries to client
+        JSONObject availableEntriesProtocol = protocolBuilder.buildAvailableEntriesProtocol(entryList);
+        try {
+            this.out.writeObject(availableEntriesProtocol);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //Extract user request
+        JSONObject userRequest;
+        try {
+            userRequest = inStreamHelper.handleRequest(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        String requestedEntry = this.settings.getEntryFolder() + userRequest.getJSONObject("protocol_body").getString("data_name");
+
+        //Send requested data to user
+        JSONObject dataProtocol = protocolBuilder.buildDataSendProtocol(requestedEntry);      
+        try {
+            this.out.writeObject(dataProtocol);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

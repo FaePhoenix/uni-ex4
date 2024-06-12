@@ -23,8 +23,9 @@ import jakarta.mail.internet.MimeMultipart;
 
 public class Server {
 
-    private ArrayList<User> users;
+    private ArrayList<User> users; //rework
     private ServerSocket socket;
+    private ServerSetting settings;
 
 
     public Server () throws IOException{
@@ -32,9 +33,10 @@ public class Server {
     }
 
 
-    public Server(int port) throws IOException{
+    public Server(int port, String ServerFolderLocation) throws IOException{
         this.socket = new ServerSocket(port);
         this.users = new ArrayList<User>();
+        this.settings = new ServerSetting(ServerFolderLocation);
     }
 
 
@@ -54,7 +56,7 @@ public class Server {
 
             //Start user thread
             System.out.println("Connection authenticated");
-            ServerThread connection = new ServerThread(clientConnection);
+            ServerThread connection = new ServerThread(clientConnection, this.settings);
             System.out.println("Starting Connection-Thread");
             connection.start();
         }

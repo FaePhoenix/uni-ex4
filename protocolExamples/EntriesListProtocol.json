@@ -1,0 +1,9 @@
+{
+    "protocol_type": "entries_list",
+    "protocol_version": "0.0.1",
+    "protocol_body" : {
+        "amount" : 2,
+        "data_entry_1" : "filename.txt",
+        "data_entry_2" : "filename.txt"
+    }
+}

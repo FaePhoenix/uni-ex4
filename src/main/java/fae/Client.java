@@ -228,7 +228,7 @@ public class Client{
     }
 
 
-    public void endConnection(){
+    public void endConnection() throws IOException{
         //Notify server of connection end
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject goodbyeMessage = protocolBuilder.buildEndConnectionProtocol();
