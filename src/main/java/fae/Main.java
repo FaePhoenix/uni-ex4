@@ -16,7 +16,7 @@ public class Main {
 
     public static void testing() {
         RequestBuilder builder = new RequestBuilder();
-        JSONObject request = builder.buildSendProtocol("txtfiles/FSUGenBankExample.txt");
+        JSONObject request = builder.buildDataSendProtocol("txtfiles/FSUGenBankExample.txt");
         ArrayList<String> json = new ArrayList<String>();
         json.add(request.toString());
 
