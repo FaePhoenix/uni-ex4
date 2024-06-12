@@ -1,5 +1,8 @@
 package fae;
 
+import java.lang.reflect.Array;
+import org.json.JSONObject;
+
 public class User {
     
     private String username;
@@ -10,6 +13,11 @@ public class User {
     public User(){
         this.username = "";
         this.password = "";
+    }
+
+    public User(JSONObject jsonRep){
+        this.username = (String) Array.get(jsonRep.keySet().toArray(), 0);
+        this.password = jsonRep.getString(this.username);
     }
 
 
@@ -36,5 +44,12 @@ public class User {
 
     public Boolean isEqual(User comparingUser){
         return this.getUsername() == comparingUser.getUsername();
+    }
+
+    public JSONObject toJSON(){
+        JSONObject user = new JSONObject();
+        user.put("username", this.getUsername());
+        user.put("password", this.getPassword());
+        return user;
     }
 }

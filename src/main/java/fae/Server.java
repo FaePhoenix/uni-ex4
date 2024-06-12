@@ -23,9 +23,10 @@ import jakarta.mail.internet.MimeMultipart;
 
 public class Server {
 
-    private ArrayList<User> users; //rework
+    private ArrayList<User> users;
     private ServerSocket socket;
     private ServerSetting settings;
+    private User newestUser;
 
 
     public Server () throws IOException{
@@ -56,7 +57,7 @@ public class Server {
 
             //Start user thread
             System.out.println("Connection authenticated");
-            ServerThread connection = new ServerThread(clientConnection, this.settings);
+            ServerThread connection = new ServerThread(clientConnection, this.settings, this.newestUser);
             System.out.println("Starting Connection-Thread");
             connection.start();
         }
@@ -95,10 +96,24 @@ public class Server {
         }
         
         //Add user to userlist
+        this.setUser(username, password);
+        return true;
+    }
+
+
+    private void setUser(String username, String password) {
         User client = new User(username);
         client.setPassword(password);
         this.users.add(client);
-        return true;
+        this.newestUser = client;
+
+        String filename = this.settings.getUserLocation();
+        FileHelper users = new FileHelper(filename);
+        String content = String.join("", users.getContent());
+        JSONObject userRep = new JSONObject(content);
+        userRep.put(username, password);
+        FileHelper newUsers = new FileHelper(userRep);
+        newUsers.saveToFile(filename);
     }
 
 

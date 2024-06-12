@@ -3,6 +3,9 @@ package fae;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import org.json.JSONObject;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,6 +55,10 @@ public class FileHelper {
         this.content = content;
     }
 
+    public FileHelper(JSONObject data){
+        this.content = new ArrayList<String>();
+        this.content.add(data.toString());
+    }
 
     public void setEmpty(){
         this.content = new ArrayList<String>();

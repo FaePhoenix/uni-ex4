@@ -14,17 +14,19 @@ public class ServerThread extends Thread{
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private ServerSetting settings;
+    private User user;
 
     public ServerThread(){
         this.ClientConnection = new Socket();
 
     }
 
-    public ServerThread(Socket connection, ServerSetting settings) throws IOException{
+    public ServerThread(Socket connection, ServerSetting settings, User me) throws IOException{
         this.ClientConnection = connection;
         this.in = new ObjectInputStream(this.ClientConnection.getInputStream());
         this.out = new ObjectOutputStream(this.ClientConnection.getOutputStream()); 
         this.settings = settings;
+        this.user = me;
     }
 
     public void run() {
@@ -113,7 +115,28 @@ public class ServerThread extends Thread{
 
     }
 
+
     private void changeUserPassword(String newPwd){
 
+        //Get users from file
+        String filename = this.settings.getUserLocation();
+        FileHelper users = new FileHelper(filename);
+        String content = String.join("", users.getContent());
+        JSONObject userRep = new JSONObject(content);
+
+        //Change password in file
+        userRep.remove(this.user.getUsername());
+        userRep.put(this.user.getUsername(), newPwd);
+        FileHelper newUsers = new FileHelper(userRep);
+        newUsers.saveToFile(filename);
+
+        //Send confirmation to client
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        JSONObject pwdChangeConfirmation = protocolBuilder.buildPasswordChangeResponse(true);
+        try {
+            this.out.writeObject(pwdChangeConfirmation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

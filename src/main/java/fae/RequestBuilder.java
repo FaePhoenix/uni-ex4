@@ -120,6 +120,17 @@ public class RequestBuilder {
     }
 
 
+    public JSONObject buildPasswordChangeResponse(boolean status) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "entries_list");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("change_status", status);
+        baseProtocol.put("protocol_body", protocol);
+        
+        return baseProtocol;
+    }
+
+
     
 
 
