@@ -62,71 +62,27 @@ public class Server {
 
 
     private Boolean authenticate(Socket connection) throws IOException, MessagingException {
+
+        //Build Helpers
+        RequestBuilder protocol_builder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //Build Object-Streams
         ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
         ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream()); 
         
-        ObjectParser inStreamHelper = new ObjectParser();
+        //Extract username and 
+        JSONObject userRequest = inStreamHelper.handleInput(in, "first_contact");
+        String username = userRequest.getJSONObject("protocol_body").getString("username");
 
-        JSONObject userRepsonse = inStreamHelper.handleIN
-        //Get user first-contact
-        Object firstContact;
-        try{
-            firstContact = in.readObject();
-        } catch(ClassNotFoundException exception){
-            exception.printStackTrace();
-            return false;
-        }
-
-        //Check socket problems
-        if (!(firstContact instanceof JSONObject)){
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + firstContact.getClass());
-            return false;
-        }
-
-        //Check response type
-        JSONObject userRequest = (JSONObject) firstContact;
-        if(userRequest.getString("protocol_type") != "first_contact"){ 
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + userRequest.getString("protocol_type"));
-            return false;
-        }
-
-        //Extract username and send user password
-        JSONObject requestBody = userRequest.getJSONObject("protocol_body");
-        String username = requestBody.getString("username");
+        //Generate password and send to user
         String password = this.generatePassword(username);
         String emailContent = "password: " + password;
         sendEmail(username, "Server-Verification", emailContent);
 
-        //Get user password confirmation
-        Object response;
-        try{
-            response = in.readObject();
-        } catch(ClassNotFoundException exception){
-            exception.printStackTrace();
-            return false;
-        }
-
-        //Check socket problems
-        if (!(response instanceof JSONObject)){
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + response.getClass());
-            return false;
-        }
-
-        //Check response type
-        JSONObject userResponse = (JSONObject) response;
-        if(userResponse.getString("protocol_type") != "first_contact"){ 
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + userResponse.getString("protocol_type"));
-            return false;
-        }
-
         //Check user password 
-        RequestBuilder protocol_builder = new RequestBuilder();
-        JSONObject protocolBody = userResponse.getJSONObject("protocol_body");
-        String user_password = protocolBody.getString("user_password");
+        JSONObject userResponse = inStreamHelper.handleInput(in, "FIND-OUT");
+        String user_password = userResponse.getJSONObject("protocol_body").getString("user_password");
         Boolean correctPwd = (user_password == password);
 
         //Send status to user and check for incorrect pwd
@@ -196,8 +152,7 @@ public class Server {
         Transport.send(message);
     }
 
-
-
+    
     @Override
     public void finalize(){
         try{

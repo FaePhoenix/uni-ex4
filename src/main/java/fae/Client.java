@@ -15,68 +15,46 @@ public class Client{
 
     private User user;
     private Socket socket;
+    private BufferedReader userInput;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
 
     public Client() throws IOException{
         this.user = new User();
+        this.userInput = new BufferedReader(new InputStreamReader(System.in));
     }
 
 
     public Client(String email) throws IllegalEmailFormatException, UnknownHostException, IOException{
         this.user = new User(email);
+        this.userInput = new BufferedReader(new InputStreamReader(System.in));
     }
 
 
     public Boolean connect(int port) throws UnknownHostException, IOException{
 
-        //connect to server
-        System.out.println("Connect to Server");
-        this.socket = new Socket("localhost", port);
-        System.out.println("connectionsuccessfull");
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
 
-        //Build object streams
+        //Build socket connection and object-streams
+        this.socket = new Socket("localhost", port);
         this.in = new ObjectInputStream(this.socket.getInputStream());
         this.out = new ObjectOutputStream(this.socket.getOutputStream());
 
-        //Send server handshake
-        System.out.println("sending first handshake");
-        RequestBuilder protocolBuilder = new RequestBuilder();
-        JSONObject handshake = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
-        out.writeObject(handshake);
+        //Send server greeting
+        JSONObject greeting = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
+        out.writeObject(greeting);
 
         //Get password from user and send to server
-        System.out.println("Please enter the password you recieves via email:");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        String password = reader.readLine();
-        JSONObject sHandshake = protocolBuilder.buildPasswordConfirmationProtocol(password);
-        out.writeObject(sHandshake);
-
-        //Get server response
-        Object response;
-        try {
-            response = in.readObject();
-        } catch (ClassNotFoundException e) { 
-            e.printStackTrace();
-            return false;
-        }
-
-        //Check socket problems
-        if (!(response instanceof JSONObject)){
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + response.getClass());
-            return false;
-        }
-
-        //Check response type
-        JSONObject serverResponse = (JSONObject) response;
-        if(serverResponse.getString("protocol_type") != "authenticate_response"){ 
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));  
-        }
+        System.out.println("Please enter the password you recieved via email:");
+        String password = this.userInput.readLine();
+        JSONObject pwdConfirmation = protocolBuilder.buildPasswordConfirmationProtocol(password);
+        out.writeObject(pwdConfirmation);
 
         //Check success of handshake
+        JSONObject serverResponse = inStreamHelper.handleInput(this.in, "authenticate_response");
         Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("handshake_status");
         if(!success) {
             System.out.println("Pasword wrong. Terminating");
@@ -91,11 +69,10 @@ public class Client{
 
 
     public void run() throws IOException{
-        BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
         while(true){
             System.out.println("Please Input your desired action:");
             System.out.println("S (send data); R (request data); C (change password); E (end connection)");
-            String userAction = userInput.readLine();
+            String userAction = this.userInput.readLine();
             switch(userAction){
                 case "S":
                     this.sendData(userInput);
@@ -121,39 +98,20 @@ public class Client{
 
     private void changePassword(BufferedReader userInput) throws IOException{
 
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
         //Get new Password from user
         System.out.println("Please enter your new password");
-        String newPassword = userInput.readLine();
+        String newPassword = this.userInput.readLine();
         
         //Send server the changing request
-        RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject request = protocolBuilder.buildPasswordChangeProtocol(newPassword);
         out.writeObject(request);
 
-       //Get server response
-       Object response;
-        try {
-            response = in.readObject();
-        } catch (ClassNotFoundException e) { 
-            e.printStackTrace();
-            return;
-        }
-
-        //Check socket problems
-        if (!(response instanceof JSONObject)){
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + response.getClass());
-            return;
-        }
-
-        //Check response type
-        JSONObject serverResponse = (JSONObject) response;
-        if(serverResponse.getString("protocol_type") != "change_password_response"){ 
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));  
-        }
-
         //Check success of password change
+        JSONObject serverResponse = inStreamHelper.handleInput(this.in, "change_password_response");
         Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("change_status");
         if(!success){
             System.out.println("Password change was not successfull. Please try again");
@@ -200,7 +158,7 @@ public class Client{
         for (String entry : entries){
             System.out.println(entry);
         }
-        String requestedEntryName = userInput.readLine();
+        String requestedEntryName = this.userInput.readLine();
 
         //Check if selected entry is valid
         if (!entries.contains(requestedEntryName)){
@@ -216,33 +174,13 @@ public class Client{
 
     private ArrayList<String> requestEntries() throws IOException{
 
-        //Send request for available entries
+        //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //Get available entries
         out.writeObject(protocolBuilder.buildEntriesRequestProtocol());
-
-        //Get server response
-        Object response;
-        try{
-            response = in.readObject();
-        } catch(ClassNotFoundException exception){
-            exception.printStackTrace();
-            return new ArrayList<String>();
-        }
-
-        //Check socket problems
-        if (!(response instanceof JSONObject)){
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + response.getClass());
-            return new ArrayList<String>();
-        }
-
-        //Check response type
-        JSONObject serverResponse = (JSONObject) response;
-        if(serverResponse.getString("protocol_type") != "entries_list"){ 
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
-            return new ArrayList<String>();
-        }
+        JSONObject serverResponse = inStreamHelper.handleInput(this.in, "entries_list");
 
         //Extract protocol-body
         JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
@@ -250,7 +188,7 @@ public class Client{
 
         //Check for empty entries list
         if (amount == 0) {
-            System.out.println("Server has no saved entries. Can't request Data");
+            System.out.println("Server has no saved entries. Can't request data yet");
             return new ArrayList<String>();
         }
         
@@ -267,40 +205,22 @@ public class Client{
 
     private void requestData(String entryName) throws IOException {
 
-        //Send request to server
+        //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //Request data from server and recieve
         JSONObject request = protocolBuilder.buildDataRequestProtocol(entryName);
         out.writeObject(request);
-        
-        //Get server response
-        Object response;
-        try {
-            response = in.readObject();
-        } catch(ClassNotFoundException exception){
-            exception.printStackTrace();
-            return;
-        }
-        
-        //Check socket problems 
-        if (!(response instanceof JSONObject)) {
-            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
-            System.out.println("Got Objectt of instance: " + response.getClass());
-            return;
-        }
-        JSONObject serverResponse = (JSONObject) response;
-        
-        //Check response type
-        if (serverResponse.getString("protocol_type") != "send_data") {
-            System.out.println("Got wrong protocol back. Please try again");
-            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));
-            return;  
-        }
-        
-        //Extract filename and save recieved information
+        JSONObject serverResponse = inStreamHelper.handleInput(this.in, "send_data");
+
+        //Extract data from protocol
         JSONObject responseBody = serverResponse.getJSONObject("protocol_body");
         JSONObject dataBody = responseBody.getJSONObject("data_body");
         FSUGenBank entry = new FSUGenBank(dataBody);
-        String saveLocation = "txtfiles/" + entryName + ".txt";
+
+        //Save recieved information to file
+        String saveLocation = "txtfiles/" + entryName + ".txt"; //TO-DO Look at implementation of entryNames
         entry.saveToFile(saveLocation);
         System.out.println("Successfully saved requested data as: " + saveLocation);
     }
