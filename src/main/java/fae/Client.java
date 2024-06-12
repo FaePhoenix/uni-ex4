@@ -33,32 +33,65 @@ public class Client{
     }
 
 
-    //TO-DO rebuild authentication
     public Boolean connect(int port) throws UnknownHostException, IOException{
+
+        //connect to server
         System.out.println("Connect to Server");
         this.socket = new Socket("localhost", port);
         System.out.println("connectionsuccessfull");
+
+        //Build object streams
         this.in = new ObjectInputStream(this.socket.getInputStream());
         this.out = new ObjectOutputStream(this.socket.getOutputStream());
 
-        //Authenticate
-        System.out.println("sending username");
-        this.out.writeUTF(this.user.getUsername());
-        
+        //Send server handshake
+        System.out.println("sending first handshake");
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        JSONObject handshake = protocolBuilder.buildHandshake(this.user.getUsername());
+        out.writeObject(handshake);
+
+        //Get password from user and send to server
         System.out.println("Please enter the password you recieves via email:");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String password = reader.readLine();
-        this.out.writeUTF(password);
-        Boolean passwordCorrect = this.in.readBoolean();
+        JSONObject sHandshake = protocolBuilder.buildSHandshake(password);
+        out.writeObject(sHandshake);
 
-        if (passwordCorrect){
-            System.out.println("Client-Success for: " + this.user.getUsername());
-            this.user.setPassword(password);
-            return true;
-        } else{
+        //Get server response
+        Object response;
+        try {
+            response = in.readObject();
+        } catch (ClassNotFoundException e) { 
+            e.printStackTrace();
+            return false;
+        }
+
+        //Check socket problems
+        if (!(response instanceof JSONObject)){
+            System.out.println("Got answer in wrong format back. Changing Password failed. Please try again");
+            System.out.println("Got Objectt of instance: " + response.getClass());
+            return false;
+        }
+
+        //Check response type
+        JSONObject serverResponse = (JSONObject) response;
+        if(serverResponse.getString("protocol_type") != "authenticate_response"){ 
+            System.out.println("Got wrong protocol back. Please try again");
+            System.out.println("Got protocol of type: " + serverResponse.getString("protocol_type"));  
+        }
+
+        //Check success of handshake
+        Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("handshake_status");
+        if(!success) {
             System.out.println("Pasword wrong. Terminating");
             return false;
-        }  
+        }
+
+        //Setting password
+        System.out.println("Client-Success for: " + this.user.getUsername());
+        this.user.setPassword(password);
+        return true;
+
     }
 
 
@@ -287,7 +320,6 @@ public class Client{
             }
         }
     }
-
 
 
     @Override
