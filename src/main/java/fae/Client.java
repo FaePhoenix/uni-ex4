@@ -43,14 +43,14 @@ public class Client{
         //Send server handshake
         System.out.println("sending first handshake");
         RequestBuilder protocolBuilder = new RequestBuilder();
-        JSONObject handshake = protocolBuilder.buildHandshake(this.user.getUsername());
+        JSONObject handshake = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
         out.writeObject(handshake);
 
         //Get password from user and send to server
         System.out.println("Please enter the password you recieves via email:");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String password = reader.readLine();
-        JSONObject sHandshake = protocolBuilder.buildSHandshake(password);
+        JSONObject sHandshake = protocolBuilder.buildPasswordConfirmationProtocol(password);
         out.writeObject(sHandshake);
 
         //Get server response
@@ -303,7 +303,7 @@ public class Client{
         FSUGenBank entry = new FSUGenBank(dataBody);
         String saveLocation = "txtfiles/" + entryName + ".txt";
         entry.saveToFile(saveLocation);
-        System.out.println("Successfully saved requested data as: " + saveLocation)
+        System.out.println("Successfully saved requested data as: " + saveLocation);
     }
 
 

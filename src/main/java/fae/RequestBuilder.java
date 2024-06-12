@@ -1,14 +1,13 @@
 package fae;
 
-
 import org.json.JSONObject;
-
 
 
 public class RequestBuilder {
 
     public RequestBuilder() {}
 
+    
     public JSONObject buildDataSendProtocol(String filename) {
         JSONObject baseProtocol = this.baseProtocol("0.0.1", "send_data");
         FSUGenBank dataFile = new FSUGenBank(filename);
@@ -55,6 +54,27 @@ public class RequestBuilder {
 
     public JSONObject buildEntriesRequestProtocol(){
         JSONObject baseProtocol = this.baseProtocol("0.0.1", "request_entries");
+        return baseProtocol;
+    }
+
+
+    public JSONObject buildFirstContactProtocol(String userName) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "first_contact");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("username", userName);
+        baseProtocol.put("protocol_body", protocol);
+
+        return baseProtocol;
+    }
+
+
+    public JSONObject buildPasswordConfirmationProtocol(String password) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "password_confirmation");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("user_password", password);
+        baseProtocol.put("protocol_body", protocol);
         
         return baseProtocol;
     }
