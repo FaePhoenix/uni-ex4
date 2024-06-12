@@ -141,17 +141,20 @@ public class Client{
 
 
     private void sendData(BufferedReader userInput) throws IOException{
+        
+        //Get filename from user
         System.out.println("Please enter the name of the file you want to send");
         String fileName = userInput.readLine();
         
+        //Check if file exists
         FileHelper helper = new FileHelper();
         if (!helper.isValidFile(fileName)){
             return;
         }
 
+        //Send server the data
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject request = protocolBuilder.buildDataSendProtocol(fileName);
-        
         out.writeObject(request);
     }
 
