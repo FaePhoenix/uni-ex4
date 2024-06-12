@@ -84,7 +84,7 @@ public class Server {
         sendEmail(username, "Server-Verification", emailContent);
 
         //Check user password 
-        JSONObject userResponse = inStreamHelper.handleInput(in, "FIND-OUT"); //TO-DO
+        JSONObject userResponse = inStreamHelper.handleInput(in, "password_confirmation");
         String user_password = userResponse.getJSONObject("protocol_body").getString("user_password");
         Boolean correctPwd = (user_password == password);
 

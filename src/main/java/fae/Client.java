@@ -222,7 +222,7 @@ public class Client{
         FSUGenBank entry = new FSUGenBank(dataBody);
 
         //Save recieved information to file
-        String saveLocation = "txtfiles/" + entryName + ".txt"; //TO-DO Look at implementation of entryNames
+        String saveLocation = "txtfiles/" + entryName + ".txt";
         entry.saveToFile(saveLocation);
         System.out.println("Successfully saved requested data as: " + saveLocation);
     }
