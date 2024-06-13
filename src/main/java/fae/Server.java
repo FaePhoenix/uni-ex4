@@ -149,13 +149,13 @@ public class Server {
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("f56755829@web.de", "EwE3vkIrH0ZqppM");
+                return new PasswordAuthentication("sheyne3005@web.de", "Di1P4W&d*");
             }
         });
 
         //Create message
         Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress("f56755829@web.de"));
+        message.setFrom(new InternetAddress("sheyne3005@web.de"));
         message.setRecipients(
         Message.RecipientType.TO, InternetAddress.parse(recipient));
         message.setSubject(mailSubject);
