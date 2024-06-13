@@ -1,10 +1,10 @@
 package fae;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ public class Client{
     private User user;
     private Socket socket;
     private BufferedReader userInput;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
 
 
     public Client() throws IOException{
@@ -40,18 +40,22 @@ public class Client{
 
         //Build socket connection and object-streams
         this.socket = new Socket("localhost", port);
-        this.in = new ObjectInputStream(this.socket.getInputStream());
-        this.out = new ObjectOutputStream(this.socket.getOutputStream());
+        this.in = new DataInputStream(this.socket.getInputStream());
+        this.out = new DataOutputStream(this.socket.getOutputStream());
+
+        System.out.println("Build streams done");
 
         //Send server greeting
         JSONObject greeting = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
-        out.writeObject(greeting);
+        out.writeUTF(greeting.toString());
+
+        System.out.println("wrote first contact to server");
 
         //Get password from user and send to server
         System.out.println("Please enter the password you recieved via email:");
         String password = this.userInput.readLine();
         JSONObject pwdConfirmation = protocolBuilder.buildPasswordConfirmationProtocol(password);
-        out.writeObject(pwdConfirmation);
+        out.writeUTF(pwdConfirmation.toString());
 
         //Check success of handshake
         JSONObject serverResponse = inStreamHelper.handleInput(this.in, "authenticate_response");
@@ -108,7 +112,7 @@ public class Client{
         
         //Send server the changing request
         JSONObject request = protocolBuilder.buildPasswordChangeProtocol(newPassword);
-        out.writeObject(request);
+        out.writeUTF(request.toString());
 
         //Check success of password change
         JSONObject serverResponse = inStreamHelper.handleInput(this.in, "change_password_response");
@@ -143,7 +147,7 @@ public class Client{
 
         //Send server the data
         JSONObject request = protocolBuilder.buildDataSendProtocol(fileName);
-        out.writeObject(request);
+        out.writeUTF(request.toString());
     }
 
 
@@ -181,7 +185,7 @@ public class Client{
         ObjectParser inStreamHelper = new ObjectParser();
 
         //Get available entries
-        out.writeObject(protocolBuilder.buildEntriesRequestProtocol());
+        out.writeUTF(protocolBuilder.buildEntriesRequestProtocol().toString());
         JSONObject serverResponse = inStreamHelper.handleInput(this.in, "entries_list");
 
         //Extract protocol-body
@@ -213,7 +217,7 @@ public class Client{
 
         //Request data from server and recieve
         JSONObject request = protocolBuilder.buildDataRequestProtocol(entryName);
-        out.writeObject(request);
+        out.writeUTF(request.toString());
         JSONObject serverResponse = inStreamHelper.handleInput(this.in, "send_data");
 
         //Extract data from protocol
@@ -232,7 +236,7 @@ public class Client{
         //Notify server of connection end
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject goodbyeMessage = protocolBuilder.buildEndConnectionProtocol();
-        out.writeObject(goodbyeMessage);
+        out.writeUTF(goodbyeMessage.toString());
 
         //Close socket connection
         if (this.socket != null){

@@ -1,8 +1,8 @@
 package fae;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -71,26 +71,29 @@ public class Server {
         ObjectParser inStreamHelper = new ObjectParser();
 
         //Build Object-Streams
-        ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
-        ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream()); 
-        
+        DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+        DataInputStream in = new DataInputStream(connection.getInputStream());
+
         //Extract username and 
         JSONObject userRequest = inStreamHelper.handleInput(in, "first_contact");
         String username = userRequest.getJSONObject("protocol_body").getString("username");
+
 
         //Generate password and send to user
         String password = this.generatePassword(username);
         String emailContent = "password: " + password;
         sendEmail(username, "Server-Verification", emailContent);
 
+        System.out.println("sent email done");
+
         //Check user password 
         JSONObject userResponse = inStreamHelper.handleInput(in, "password_confirmation");
         String user_password = userResponse.getJSONObject("protocol_body").getString("user_password");
-        Boolean correctPwd = (user_password == password);
+        Boolean correctPwd = user_password.equals(password);
 
         //Send status to user and check for incorrect pwd
         JSONObject authenticationResponse = protocol_builder.buildUserConfirmationProtocol(correctPwd);
-        out.writeObject(authenticationResponse);
+        out.writeUTF(authenticationResponse.toString());
         if (!correctPwd){
             return false;
         }

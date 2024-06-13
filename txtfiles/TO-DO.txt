@@ -1,5 +1,2 @@
-ServerThread:
-    -alles
-
 Main + App:
     -demonstration

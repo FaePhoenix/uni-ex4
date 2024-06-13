@@ -1,8 +1,8 @@
 package fae;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,8 +11,8 @@ import org.json.JSONObject;
 public class ServerThread extends Thread{
     
     private Socket ClientConnection;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
     private ServerSetting settings;
     private User user;
 
@@ -23,8 +23,8 @@ public class ServerThread extends Thread{
 
     public ServerThread(Socket connection, ServerSetting settings, User me) throws IOException{
         this.ClientConnection = connection;
-        this.in = new ObjectInputStream(this.ClientConnection.getInputStream());
-        this.out = new ObjectOutputStream(this.ClientConnection.getOutputStream()); 
+        this.in = new DataInputStream(this.ClientConnection.getInputStream());
+        this.out = new DataOutputStream(this.ClientConnection.getOutputStream()); 
         this.settings = settings;
         this.user = me;
     }
@@ -108,7 +108,7 @@ public class ServerThread extends Thread{
         //Send available entries to client
         JSONObject availableEntriesProtocol = protocolBuilder.buildAvailableEntriesProtocol(entryList);
         try {
-            this.out.writeObject(availableEntriesProtocol);
+            this.out.writeUTF(availableEntriesProtocol.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -126,7 +126,7 @@ public class ServerThread extends Thread{
         //Send requested data to user
         JSONObject dataProtocol = protocolBuilder.buildDataSendProtocol(requestedEntry);      
         try {
-            this.out.writeObject(dataProtocol);
+            this.out.writeUTF(dataProtocol.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -152,7 +152,7 @@ public class ServerThread extends Thread{
         RequestBuilder protocolBuilder = new RequestBuilder();
         JSONObject pwdChangeConfirmation = protocolBuilder.buildPasswordChangeResponse(true);
         try {
-            this.out.writeObject(pwdChangeConfirmation);
+            this.out.writeUTF(pwdChangeConfirmation.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

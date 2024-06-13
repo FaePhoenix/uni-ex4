@@ -1,8 +1,8 @@
 package fae;
 
 
-import java.util.ArrayList;
-import org.json.JSONObject;
+import java.io.IOException;
+import jakarta.mail.MessagingException;
 
 
 
@@ -15,24 +15,13 @@ public class Main {
 
 
     public static void testing() {
-        RequestBuilder builder = new RequestBuilder();
-        JSONObject request = builder.buildDataSendProtocol("txtfiles/FSUGenBankExample.txt");
-        ArrayList<String> json = new ArrayList<String>();
-        json.add(request.toString());
-
-
-        FileHelper helper = new FileHelper(json);
-        helper.saveToFile("jsonTest.json");
-
-
-        /* 
         try {
-            Server server = new Server(1024);
+            Server server = new Server(1024, "serverLocation/");
             server.start();
         } catch (IOException | MessagingException e) {
             e.printStackTrace();
         }  
-        */
+        
     }
 
 
