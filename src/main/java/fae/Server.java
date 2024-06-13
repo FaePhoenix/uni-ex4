@@ -84,8 +84,6 @@ public class Server {
         String emailContent = "password: " + password;
         sendEmail(username, "Server-Verification", emailContent);
 
-        System.out.println("sent email done");
-
         //Check user password 
         JSONObject userResponse = inStreamHelper.handleInput(in, "password_confirmation");
         String user_password = userResponse.getJSONObject("protocol_body").getString("user_password");

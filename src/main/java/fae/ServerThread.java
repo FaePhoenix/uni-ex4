@@ -32,7 +32,8 @@ public class ServerThread extends Thread{
     public void run() {
         ObjectParser inStreamHelper = new ObjectParser();
         RequestBuilder protocolBuilder = new RequestBuilder();
-        while(true) {
+        Boolean alive = true;
+        while(alive) {
 
             //Get client request
             JSONObject clientRequest;
@@ -48,9 +49,11 @@ public class ServerThread extends Thread{
             switch (protocolType){
                 case "send_data":
                     this.handleSentClientData(clientRequest.getJSONObject("protocol_body"));
+                    break;
 
                 case "request_entries":
                     this.sendUserEntries();
+                    break;
 
                 case "change_password":
                     this.changeUserPassword(clientRequest.getJSONObject("protocol_body").getString("new_password"));
@@ -62,6 +65,7 @@ public class ServerThread extends Thread{
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    alive = false;
                     break;
 
                 default:
@@ -90,6 +94,7 @@ public class ServerThread extends Thread{
         entrArray.put(entryName);
         JSONObject newEntrList = new JSONObject();
         newEntrList.put("entries", entrArray);
+        newEntrList.put("amount", entries.getInt("amount") + 1);
         FileHelper expEntryList = new FileHelper(newEntrList);
         expEntryList.saveToFile(filename);
     }

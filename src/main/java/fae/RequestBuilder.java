@@ -13,7 +13,7 @@ public class RequestBuilder {
         FSUGenBank dataFile = new FSUGenBank(filename);
 
         JSONObject protocol = new JSONObject();
-        protocol.put("data_name", filename.substring("txtfiles/".length(), filename.lastIndexOf(".txt")));
+        protocol.put("data_name", filename.substring("serverLocation/".length(), filename.length()));
 
         JSONObject dataBody = new JSONObject();
         dataBody.put("fasta", dataFile.getFasta().toJSON());
@@ -121,18 +121,12 @@ public class RequestBuilder {
 
 
     public JSONObject buildPasswordChangeResponse(boolean status) {
-        JSONObject baseProtocol = this.baseProtocol("0.0.1", "entries_list");
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "change_password_response");
         JSONObject protocol = new JSONObject();
 
         protocol.put("change_status", status);
         baseProtocol.put("protocol_body", protocol);
         
         return baseProtocol;
-    }
-
-
-    
-
-
-    
+    } 
 }

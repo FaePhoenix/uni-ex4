@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 
@@ -43,13 +45,9 @@ public class Client{
         this.in = new DataInputStream(this.socket.getInputStream());
         this.out = new DataOutputStream(this.socket.getOutputStream());
 
-        System.out.println("Build streams done");
-
         //Send server greeting
         JSONObject greeting = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
         out.writeUTF(greeting.toString());
-
-        System.out.println("wrote first contact to server");
 
         //Get password from user and send to server
         System.out.println("Please enter the password you recieved via email:");
@@ -73,27 +71,33 @@ public class Client{
 
 
     public void run() throws IOException{
-        while(true){
+        Boolean alive = true;
+        while(alive){
             System.out.println("Please Input your desired action:");
             System.out.println("S (send data); R (request data); C (change password); E (end connection)");
             String userAction = this.userInput.readLine();
             switch(userAction){
                 case "S":
                     this.sendData(userInput);
+                    break;
 
                 case "R":
                     this.handleRequestData(userInput);
+                    break;
 
                 case "E":
                     this.endConnection();
                     System.out.println("Ended Socket-Connection");
+                    alive = false;
                     break;
 
                 case "C":
                     this.changePassword(userInput);
+                    break;
 
                 default:
                     System.out.println("Could not interpret Input. Please select an available action (S;R;C;E)");
+                    break;
             }
 
         }
@@ -200,9 +204,10 @@ public class Client{
         
         //Extract entries
         ArrayList<String> entries = new ArrayList<String>();
-        for (int idx = 1; idx <= amount; idx++){
-            String entryName = "data_entry_" + idx;
-            entries.add(responseBody.getString(entryName));
+        JSONArray entryList = responseBody.getJSONArray("entries");
+        for (int idx = 0; idx < amount; idx++){
+            String entryName = entryList.getString(idx);
+            entries.add(entryName);
         }
         
         return entries;
