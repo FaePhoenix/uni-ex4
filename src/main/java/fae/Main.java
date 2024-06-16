@@ -1,9 +1,6 @@
 package fae;
 
-
 import java.io.IOException;
-import jakarta.mail.MessagingException;
-
 
 
 
@@ -18,7 +15,7 @@ public class Main {
         try {
             Server server = new Server(1024, "serverLocation/");
             server.start();
-        } catch (IOException | MessagingException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }  
         

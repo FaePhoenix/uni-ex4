@@ -1,16 +1,16 @@
 package fae;
 
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 
 
 public class Client{
@@ -23,35 +23,28 @@ public class Client{
 
 
     public Client() throws IOException{
-        this.user = new User();
         this.userInput = new BufferedReader(new InputStreamReader(System.in));
     }
 
 
-    public Client(String email) throws IllegalEmailFormatException, UnknownHostException, IOException{
-        this.user = new User(email);
-        this.userInput = new BufferedReader(new InputStreamReader(System.in));
-    }
-
-
-    public Boolean connect(int port) throws UnknownHostException, IOException{
+    public Boolean connect(int port) throws IOException {
 
         //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
         ObjectParser inStreamHelper = new ObjectParser();
 
-        //Build socket connection and object-streams
+        //Build socket connection and data-streams
         this.socket = new Socket("localhost", port);
         this.in = new DataInputStream(this.socket.getInputStream());
         this.out = new DataOutputStream(this.socket.getOutputStream());
 
-        //Send server greeting
-        JSONObject greeting = protocolBuilder.buildFirstContactProtocol(this.user.getUsername());
+        //Get username from user and send server greeting
+        String username = getMailFromUser();
+        JSONObject greeting = protocolBuilder.buildFirstContactProtocol(username);
         out.writeUTF(greeting.toString());
 
         //Get password from user and send to server
-        System.out.println("Please enter the password you recieved via email:");
-        String password = this.userInput.readLine();
+        String password = getPasswordFromUser();
         JSONObject pwdConfirmation = protocolBuilder.buildPasswordConfirmationProtocol(password);
         out.writeUTF(pwdConfirmation.toString());
 
@@ -67,6 +60,45 @@ public class Client{
         System.out.println("Client-Success for: " + this.user.getUsername());
         this.user.setPassword(password);
         return true;
+    }
+
+    private String getMailFromUser() {
+
+        //Get input from user
+        System.out.println("Please enter your email-adress");
+        String username;
+        try {
+            username = this.userInput.readLine();
+        } catch (Exception e) {
+           System.out.println("Failed to read terminal input. Please try again:");
+           username = getMailFromUser();
+        }
+
+        //validate input
+        if (! username.matches("^((?!\\.)[\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$")){
+            System.out.println("The email you entered was invalid. Please try again:");
+            username = getMailFromUser();
+        }
+
+        //set username and return
+        this.user = new User(username);
+        return username;
+    }
+
+    private String getPasswordFromUser(){
+
+        //Get input from user
+        System.out.println("Please enter the your password.");
+        System.out.println("If you don't have a password yet, you will recieve an email:");
+        String password;
+        try {
+            password = this.userInput.readLine();
+        } catch (IOException e) {
+            System.out.println("Failed to read terminal input. Please try again:");
+            password = getPasswordFromUser();
+        }
+
+        return password;
     }
 
 
@@ -104,17 +136,14 @@ public class Client{
     }
 
 
-    private void changePassword(BufferedReader userInput) throws IOException{
+    private void changePassword(BufferedReader userInput) throws IOException {
 
         //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
         ObjectParser inStreamHelper = new ObjectParser();
 
-        //Get new Password from user
-        System.out.println("Please enter your new password");
-        String newPassword = this.userInput.readLine();
-        
-        //Send server the changing request
+        //Get new Password from user and send server the changing request
+        String newPassword = getNewPasswordFromuser();
         JSONObject request = protocolBuilder.buildPasswordChangeProtocol(newPassword);
         out.writeUTF(request.toString());
 
@@ -133,25 +162,53 @@ public class Client{
         return;
     }
 
+    private String getNewPasswordFromuser() {
+        
+        //Get input from user
+        System.out.println("Please enter your new password");
+        String newPassword;
+        try {
+            newPassword = this.userInput.readLine();
+        } catch (IOException e) {
+            System.out.println("Failed to read terminal input. Please try again:");
+            newPassword = getPasswordFromUser();
+        }
+
+        return newPassword;
+    }
+
 
     private void sendData(BufferedReader userInput) throws IOException{
 
         //Build helper
         RequestBuilder protocolBuilder = new RequestBuilder();
 
-        //Get filename from user
-        System.out.println("Please enter the name of the file you want to send");
-        String fileName = userInput.readLine();
-        
-        //Check if file exists
-        FileHelper helper = new FileHelper();
-        if (!helper.isValidFile(fileName)){
-            return;
-        }
-
-        //Send server the data
+        //Get filename from user and send server the data
+        String fileName = getValidFilenameFromUser();
         JSONObject request = protocolBuilder.buildDataSendProtocol(fileName);
         out.writeUTF(request.toString());
+    }
+
+    private String getValidFilenameFromUser() {
+
+        //Get input from user
+        System.out.println("Please enter the name of the file you want to send");
+        String fileName;
+        try {
+            fileName = userInput.readLine();
+        } catch (IOException e) {
+            System.out.println("Failed to read terminal input. Please try again:");
+            fileName = getValidFilenameFromUser();
+        }
+
+        //validate input
+        FileHelper helper = new FileHelper();
+        if (!helper.isValidFile(fileName)){
+            System.out.println("The filename you entered was invalid. Please try again:");
+            fileName = getValidFilenameFromUser();
+        }
+
+        return fileName;
     }
 
 
@@ -159,26 +216,42 @@ public class Client{
 
         //Get available entries and end when not available
         ArrayList<String> entries = requestEntries();
-        if (entries == null || entries.size() == 0) {
+        if (entries.size() == 0) {
             return;
         }
         
-        //Get user selection from entries
+        //Get user selection from entries and request data from server
+        String requestedEntryName = getValidEntryFromUser(entries);
+        this.requestData(requestedEntryName);
+    }
+
+    private String getValidEntryFromUser(ArrayList<String> entries){
+
+        //Give available options to user
         System.out.println("Please type one of the available entries you want to request:");
         for (String entry : entries){
             System.out.println(entry);
         }
-        String requestedEntryName = this.userInput.readLine();
 
-        //Check if selected entry is valid
-        if (!entries.contains(requestedEntryName)){
-            System.out.println("Given name is not in the presented available entries. Please try again");
-            System.out.println("Got name: " + requestedEntryName);
-            return;
+        //Get input from user
+        String requestedEntryName;
+        try {
+            requestedEntryName = this.userInput.readLine();
+        } catch (IOException e) {
+            System.out.println("Failed to read terminal input. Please try again:");
+            requestedEntryName = getValidEntryFromUser(entries);
         }
-           
-        //request valid data from server
-        this.requestData(requestedEntryName);
+
+
+        //validate input
+        if (!entries.contains(requestedEntryName)){
+            System.out.println("Got name: " + requestedEntryName);
+            System.out.println("Given name is not in the presented available entries. Please try again");
+            requestedEntryName = getValidEntryFromUser(entries);
+        }
+
+
+        return requestedEntryName;
     }
 
 

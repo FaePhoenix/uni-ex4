@@ -6,19 +6,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.Set;
+
 import org.json.JSONObject;
-import jakarta.mail.Authenticator;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Multipart;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
+
 
 
 public class Server {
@@ -41,7 +32,7 @@ public class Server {
     }
 
 
-    public void start() throws IOException, MessagingException{
+    public void start() throws IOException {
         while (true) {
             //Wait for user connection request
             System.out.println("Looking for connection");
@@ -64,7 +55,7 @@ public class Server {
     }
 
 
-    private Boolean authenticate(Socket connection) throws IOException, MessagingException {
+    private Boolean authenticate(Socket connection) throws IOException {
 
         //Build Helpers
         RequestBuilder protocol_builder = new RequestBuilder();
@@ -74,15 +65,13 @@ public class Server {
         DataOutputStream out = new DataOutputStream(connection.getOutputStream());
         DataInputStream in = new DataInputStream(connection.getInputStream());
 
-        //Extract username and 
+        //Extract username 
         JSONObject userRequest = inStreamHelper.handleInput(in, "first_contact");
         String username = userRequest.getJSONObject("protocol_body").getString("username");
 
-
-        //Generate password and send to user
-        String password = this.generatePassword(username);
-        String emailContent = "password: " + password;
-        sendEmail(username, "Server-Verification", emailContent);
+        //Compare to known Users
+        ArrayList<String> knownUsers = getKnownUsers();
+        String password = knownUsers.contains(username) ? getPassword(username) : firstTimeUser(username);
 
         //Check user password 
         JSONObject userResponse = inStreamHelper.handleInput(in, "password_confirmation");
@@ -101,6 +90,49 @@ public class Server {
         return true;
     }
 
+    private ArrayList<String> getKnownUsers() {
+
+        //Extract json from file
+        FileHelper helper = new FileHelper(this.settings.getUserLocation());
+        JSONObject usrs = new JSONObject(String.join("", helper.getContent()));
+
+        //get known users
+        Set<String> knownUsrs = usrs.keySet();
+        ArrayList<String> knownUsers = new ArrayList<String>();
+        knownUsers.addAll(knownUsrs);
+
+        return knownUsers;
+    }
+
+    private String firstTimeUser(String username) {
+        String password = this.generatePassword();
+        emailUser(username, password);
+        return password;
+    }
+
+    private String getPassword(String username) {
+
+        //Extract json from file
+        FileHelper helper = new FileHelper(this.settings.getUserLocation());
+        JSONObject usrs = new JSONObject(String.join("", helper.getContent()));
+
+        //Get password from json
+        String pasword = usrs.getString(username);
+        return pasword;
+
+    }
+
+    private void emailUser(String username, String password) {
+
+        //Preare content
+        Mailing mailer = new Mailing();
+        String emailContent = "password: " + password;
+
+        //Send email to client
+        while (!mailer.sendEmail(username, password, emailContent)) {
+            continue;
+        }
+    }
 
     private void setUser(String username, String password) {
         User client = new User(username);
@@ -117,13 +149,12 @@ public class Server {
         newUsers.saveToFile(filename);
     }
 
-
-    private String generatePassword(String username) {
+    private String generatePassword() {
         //Helper values
         String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                     + "0123456789"
                                     + "abcdefghijklmnopqrstuvxyz";
-        int passwordSize = username.length();
+        int passwordSize = 8;
         StringBuilder sb = new StringBuilder(passwordSize);
 
         //Generate Password
@@ -133,41 +164,6 @@ public class Server {
         }
 
         return sb.toString();
-    }
-    
-
-    private void sendEmail(String recipient, String mailSubject, String content) throws MessagingException {
-
-        //Set Properties
-        Properties prop = new Properties();
-        prop.put("mail.smtp.auth", true);
-        prop.put("mail.smtp.starttls.enable", "true");
-        prop.put("mail.smtp.host", "smtp.web.de");
-        prop.put("mail.smtp.port", "587");
-
-        //Get Session
-        Session session = Session.getInstance(prop, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("sheyne3005@web.de", "Di1P4W&d*");
-            }
-        });
-
-        //Create message
-        Message message = new MimeMessage(session);
-        message.setFrom(new InternetAddress("sheyne3005@web.de"));
-        message.setRecipients(
-        Message.RecipientType.TO, InternetAddress.parse(recipient));
-        message.setSubject(mailSubject);
-
-        //Fill message
-        MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(content, "text/html; charset=utf-8");
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(mimeBodyPart);
-        message.setContent(multipart);
-
-        Transport.send(message);
     }
 
     
