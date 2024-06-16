@@ -106,15 +106,15 @@ public class Client{
         Boolean alive = true;
         while(alive){
             System.out.println("Please Input your desired action:");
-            System.out.println("S (send data); R (request data); C (change password); E (end connection)");
+            System.out.println("S (send data); R (request data); C (change password); D (dotplot); E (end connection)");
             String userAction = this.userInput.readLine();
             switch(userAction){
                 case "S":
-                    this.sendData(userInput);
+                    this.sendData();
                     break;
 
                 case "R":
-                    this.handleRequestData(userInput);
+                    this.handleRequestData();
                     break;
 
                 case "E":
@@ -124,9 +124,12 @@ public class Client{
                     break;
 
                 case "C":
-                    this.changePassword(userInput);
+                    this.changePassword();
                     break;
-
+                
+                case "D":
+                    this.handleDotPlot();
+                    break;
                 default:
                     System.out.println("Could not interpret Input. Please select an available action (S;R;C;E)");
                     break;
@@ -136,7 +139,7 @@ public class Client{
     }
 
 
-    private void changePassword(BufferedReader userInput) throws IOException {
+    private void changePassword() throws IOException {
 
         //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
@@ -178,7 +181,7 @@ public class Client{
     }
 
 
-    private void sendData(BufferedReader userInput) throws IOException{
+    private void sendData() throws IOException{
 
         //Build helper
         RequestBuilder protocolBuilder = new RequestBuilder();
@@ -212,7 +215,7 @@ public class Client{
     }
 
 
-    private void handleRequestData(BufferedReader userInput) throws IOException{
+    private void handleRequestData() throws IOException{
 
         //Get available entries and end when not available
         ArrayList<String> entries = requestEntries();
@@ -307,6 +310,37 @@ public class Client{
         String saveLocation = "txtfiles/" + entryName + ".txt";
         entry.saveToFile(saveLocation);
         System.out.println("Successfully saved requested data as: " + saveLocation);
+    }
+
+    private void handleDotPlot() throws IOException {
+
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser interpreter = new ObjectParser();
+
+
+        //Get available entries and end when not available
+        ArrayList<String> entries = requestEntries();
+        if (entries.size() == 0) {
+            return;
+        }
+        
+        //Get user selection from entries and request data from server
+        String entry1 = getValidEntryFromUser(entries);
+        String entry2 = getValidEntryFromUser(entries);
+
+        JSONObject sequenceRequest = protocolBuilder.buildRequestSequenceProtocol(entry1, entry2);
+        this.out.writeUTF(sequenceRequest.toString());
+
+        JSONObject responses = interpreter.handleInput(this.in, "sequences_response");
+        JSONObject protocolBody = responses.getJSONObject("protocol_body");
+        String sequence1 = protocolBody.getString("sequence_1");
+        String sequence2 = protocolBody.getString("sequence_2");
+
+        Fasta fasta1 = new Fasta(">", new ArrayList<String>(), sequence1);
+        Fasta fasta2 = new Fasta(">", new ArrayList<String>(), sequence2);
+        fasta1.sequenceComparison(fasta2);
+
     }
 
 

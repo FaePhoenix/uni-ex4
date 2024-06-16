@@ -111,14 +111,16 @@ public class RequestBuilder {
         return baseProtocol;
     }
 
+    public JSONObject buildRequestSequenceProtocol(String entry1, String entry2) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "request_sequences");
+        JSONObject protocol = new JSONObject();
 
-    private JSONObject baseProtocol(String protocolVersion, String protocolType) {
-        JSONObject baseProtocol = new JSONObject();
-        baseProtocol.put("protocol_version", protocolVersion);
-        baseProtocol.put("protocol_type", protocolType);
+        protocol.put("entry_1", entry1);
+        protocol.put("entry_2", entry2);
+        baseProtocol.put("protocol_body", protocol);
+
         return baseProtocol;
-    }
-
+    } 
 
     public JSONObject buildPasswordChangeResponse(boolean status) {
         JSONObject baseProtocol = this.baseProtocol("0.0.1", "change_password_response");
@@ -128,5 +130,23 @@ public class RequestBuilder {
         baseProtocol.put("protocol_body", protocol);
         
         return baseProtocol;
-    } 
+    }
+
+
+    public JSONObject buildEntriesSendProtocol(String sequence1, String sequence2) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "sequences_response");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("sequence_1", sequence1);
+        protocol.put("sequence_2", sequence2);
+        return baseProtocol;
+    }
+
+
+    private JSONObject baseProtocol(String protocolVersion, String protocolType) {
+        JSONObject baseProtocol = new JSONObject();
+        baseProtocol.put("protocol_version", protocolVersion);
+        baseProtocol.put("protocol_type", protocolType);
+        return baseProtocol;
+    }
 }

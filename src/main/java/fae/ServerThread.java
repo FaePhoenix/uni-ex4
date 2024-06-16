@@ -57,6 +57,9 @@ public class ServerThread extends Thread{
 
                 case "change_password":
                     this.changeUserPassword(clientRequest.getJSONObject("protocol_body").getString("new_password"));
+                
+                case "":
+                    this.sendEntries(clientRequest.getJSONObject("protocol_body"));
 
                 case "end_connection":
                     //Socket schließen
@@ -75,6 +78,29 @@ public class ServerThread extends Thread{
         }
     }
 
+
+    private void sendEntries(JSONObject protocol_body) {
+
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();        
+
+        //Extract sequences
+        String filename1 = this.settings.getEntryFolder() + protocol_body.getString("entry_1") + ".txt";
+        FSUGenBank entry1 = new FSUGenBank(filename1);
+        String sequence1 = entry1.getFasta().getDnaSequence();
+
+        String filename2 = this.settings.getEntryFolder() + protocol_body.getString("entry_2") + ".txt";
+        FSUGenBank entry2 = new FSUGenBank(filename2);
+        String sequence2 = entry2.getFasta().getDnaSequence();
+
+        //Send sequences to client
+        JSONObject response = protocolBuilder.buildEntriesSendProtocol(sequence1, sequence2);
+        try {
+            this.out.writeUTF(response.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void handleSentClientData(JSONObject protocolBody){
         //save user entry
