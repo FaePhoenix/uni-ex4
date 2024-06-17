@@ -147,7 +147,7 @@ public class ServerThread extends Thread{
         //Extract user request
         JSONObject userRequest;
         try {
-            userRequest = inStreamHelper.handleRequest(in);
+            userRequest = inStreamHelper.handleInput(this.in, "request_data");
         } catch (IOException e) {
             e.printStackTrace();
             return;
