@@ -111,6 +111,7 @@ public class Client{
             switch(userAction){
                 case "S":
                     this.sendData();
+                    System.out.println("Successfully send data to server");
                     break;
 
                 case "R":
@@ -130,8 +131,9 @@ public class Client{
                 case "D":
                     this.handleDotPlot();
                     break;
+
                 default:
-                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;E)");
+                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;D;E)");
                     break;
             }
 
@@ -318,13 +320,12 @@ public class Client{
         RequestBuilder protocolBuilder = new RequestBuilder();
         ObjectParser interpreter = new ObjectParser();
 
-
         //Get available entries and end when not available
         ArrayList<String> entries = requestEntries();
         if (entries.size() == 0) {
             return;
         }
-        
+
         //Get user selection from entries and request data from server
         String entry1 = getValidEntryFromUser(entries);
         String entry2 = getValidEntryFromUser(entries);
@@ -332,10 +333,15 @@ public class Client{
         JSONObject sequenceRequest = protocolBuilder.buildRequestSequenceProtocol(entry1, entry2);
         this.out.writeUTF(sequenceRequest.toString());
 
+        System.out.println("sent protocol");
+
         JSONObject responses = interpreter.handleInput(this.in, "sequences_response");
+
         JSONObject protocolBody = responses.getJSONObject("protocol_body");
         String sequence1 = protocolBody.getString("sequence_1");
         String sequence2 = protocolBody.getString("sequence_2");
+
+        System.out.println("extracted sequences");
 
         Fasta fasta1 = new Fasta(">", new ArrayList<String>(), sequence1);
         Fasta fasta2 = new Fasta(">", new ArrayList<String>(), sequence2);

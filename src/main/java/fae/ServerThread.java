@@ -39,6 +39,7 @@ public class ServerThread extends Thread{
             JSONObject clientRequest;
             try {
                 clientRequest = inStreamHelper.handleRequest(this.in);
+                System.out.println("Got protocol from user");
             } catch (IOException e) {
                 e.printStackTrace();
                 clientRequest = protocolBuilder.buildErrorProtocol();
@@ -51,15 +52,23 @@ public class ServerThread extends Thread{
                     this.handleSentClientData(clientRequest.getJSONObject("protocol_body"));
                     break;
 
-                case "request_data":
+                case "request_entries":
                     this.sendUserEntries();
                     break;
 
+
                 case "change_password":
                     this.changeUserPassword(clientRequest.getJSONObject("protocol_body").getString("new_password"));
+                    break;
                 
                 case "request_sequences":
-                    this.sendEntries(clientRequest.getJSONObject("protocol_body"));
+                    this.sendSequences(clientRequest.getJSONObject("protocol_body")); 
+                    break;
+
+                case "request_data":
+                    this.sendUserRequestedEntry(clientRequest.getJSONObject("protocol_body").getString("data_name"));
+                    break;
+
 
                 case "end_connection":
                     //Socket schließen
@@ -79,19 +88,21 @@ public class ServerThread extends Thread{
     }
 
 
-    private void sendEntries(JSONObject protocol_body) {
+    private void sendSequences(JSONObject protocol_body) {
 
         //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();        
 
+
         //Extract sequences
-        String filename1 = this.settings.getEntryFolder() + protocol_body.getString("entry_1") + ".txt";
+        String filename1 = this.settings.getEntryFolder() + protocol_body.getString("entry_1");
         FSUGenBank entry1 = new FSUGenBank(filename1);
         String sequence1 = entry1.getFasta().getDnaSequence();
 
-        String filename2 = this.settings.getEntryFolder() + protocol_body.getString("entry_2") + ".txt";
+        String filename2 = this.settings.getEntryFolder() + protocol_body.getString("entry_2");
         FSUGenBank entry2 = new FSUGenBank(filename2);
         String sequence2 = entry2.getFasta().getDnaSequence();
+
 
         //Send sequences to client
         JSONObject response = protocolBuilder.buildEntriesSendProtocol(sequence1, sequence2);
@@ -129,7 +140,6 @@ public class ServerThread extends Thread{
 
         //Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
-        ObjectParser inStreamHelper = new ObjectParser();
 
         //Get information from file
         String fileName = this.settings.getEntryListLocation();
@@ -143,25 +153,6 @@ public class ServerThread extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //Extract user request
-        JSONObject userRequest;
-        try {
-            userRequest = inStreamHelper.handleInput(this.in, "request_data");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        String requestedEntry = this.settings.getEntryFolder() + userRequest.getJSONObject("protocol_body").getString("data_name");
-
-        //Send requested data to user
-        JSONObject dataProtocol = protocolBuilder.buildDataSendProtocol(requestedEntry);      
-        try {
-            this.out.writeUTF(dataProtocol.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
 
@@ -184,6 +175,23 @@ public class ServerThread extends Thread{
         JSONObject pwdChangeConfirmation = protocolBuilder.buildPasswordChangeResponse(true);
         try {
             this.out.writeUTF(pwdChangeConfirmation.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void sendUserRequestedEntry(String dataname) {
+
+        //Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+
+        String requestedEntry = this.settings.getEntryFolder() + dataname;
+
+        //Send requested data to user
+        JSONObject dataProtocol = protocolBuilder.buildDataSendProtocol(requestedEntry);      
+        try {
+            this.out.writeUTF(dataProtocol.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

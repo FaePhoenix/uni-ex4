@@ -139,6 +139,7 @@ public class RequestBuilder {
 
         protocol.put("sequence_1", sequence1);
         protocol.put("sequence_2", sequence2);
+        baseProtocol.put("protocol_body", protocol);
         return baseProtocol;
     }
 

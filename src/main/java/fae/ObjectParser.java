@@ -28,12 +28,13 @@ public class ObjectParser {
     }
 
     public JSONObject handleRequest(DataInputStream in) throws IOException {
+
         //Get user first-contact
         String streamOutput = in.readUTF();
         
-
         //Return JSON-Protocol
         JSONObject JSONInput = new JSONObject(streamOutput);
+
         return JSONInput;
     }
 }
