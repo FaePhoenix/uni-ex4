@@ -51,14 +51,14 @@ public class ServerThread extends Thread{
                     this.handleSentClientData(clientRequest.getJSONObject("protocol_body"));
                     break;
 
-                case "request_entries":
+                case "request_data":
                     this.sendUserEntries();
                     break;
 
                 case "change_password":
                     this.changeUserPassword(clientRequest.getJSONObject("protocol_body").getString("new_password"));
                 
-                case "":
+                case "request_sequences":
                     this.sendEntries(clientRequest.getJSONObject("protocol_body"));
 
                 case "end_connection":
